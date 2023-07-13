@@ -9,10 +9,10 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-import django_heroku
-import dj_database_url
-import pytz
-import datetime
+# import django_heroku
+# import dj_database_url
+# import pytz
+# import datetime
 from django.utils import timezone
 import pymysql
 from pathlib import Path
@@ -98,7 +98,7 @@ WSGI_APPLICATION = 'momoda.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME':"momoda",
+        'NAME':"test2",
         'USER': 'root',
         'PASSWORD': "",
         'HOST': "localhost",
@@ -139,7 +139,7 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
@@ -159,8 +159,12 @@ AUTHENTICATION_BACKENDS = [
 
 ]
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST='smtp.gmail.com'
+EMAIL_USE_TLS=True
+EMAIL_PORT=587
+EMAIL_HOST_USER='arshiaadouli@gmail.com'
+EMAIL_HOST_PASSWORD='zrwejvsuanppkwud'
 SITE_ID = 1
 
 AUTH_USER_MODEL = 'users.User'
@@ -186,7 +190,7 @@ MEDIA_URL = '/files/'
 DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap4.html"
 STATIC_ROOT=os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS=(os.path.join(BASE_DIR, 'static'),)
-django_heroku.settings(locals())
+# django_heroku.settings(locals())
 
 # import dj_database_url
 # db_from_env = dj_database_url.config(conn_max_age=600)

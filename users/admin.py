@@ -7,7 +7,7 @@ class UserAdminConfig(UserAdmin):
     search_fields = ('first_name', 'last_name', 'orcid')                                    #list of searchable fields
     list_filter = ()                                                                        #disable filter list
     ordering = ('-id',)                                                                     #order by id, descending order
-    list_display = ('first_name', 'last_name', 'orcid', 'is_staff', 'is_active')            #only show these values in the table
+    list_display = ('first_name', 'last_name', 'orcid', 'is_staff', 'is_superuser', 'is_active')            #only show these values in the table
 
     fieldsets = (
         (None, {'fields': ('email', 'first_name', 'last_name', 'orcid')}),
@@ -16,11 +16,11 @@ class UserAdminConfig(UserAdmin):
 
     add_fieldsets = (                                               #list of data you want to add to the database when making a new user.
         (None, {
-            'fields': ('email', 'first_name', 'last_name', 'orcid', 'password1', 'password2', 'is_active', 'is_staff')}
+            'fields': ('email', 'first_name', 'last_name', 'orcid', 'password1', 'password2', 'is_active', 'is_staff', 'is_superuser')}
          ),
     )
 
-admin.site.register(User, UserAdminConfig)
+admin.site.register(User)
 
 class GroupAdminConfig(admin.ModelAdmin):
 

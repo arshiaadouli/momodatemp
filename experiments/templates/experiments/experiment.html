@@ -14,7 +14,7 @@
         {% if supplies %}
             {% render_table supplies %}
         {% endif %}
-        <form method="post" action="{% url 'experiment_detail' pk %}" novalidate>
+        <form method="post" action="{% url 'experiment_detail' pk error %}" novalidate>
             {% csrf_token %}
 
             <div class="row mb-3">
@@ -54,6 +54,9 @@
                 {% render_field file_form.file class="form-control custom-file-input" id=file_form.file.id_for_label%}
                 <div class="text-danger ms-2 small">{% for error in file_form.file.errors %} {{ error }} {% endfor %}</div>
             </div>
+            {% if error %}
+            <p style="color: tomato;">an error has been occured</p>
+            {% endif %}
             <button type="submit" class="btn btn-success mb-3">Upload file</button>
         </form>
     </div>

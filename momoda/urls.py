@@ -2,13 +2,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from users.views import home_page, my_account, research_group, create_group, get_institution_ajax
+from users.views import staff_info, home_page, my_account, research_group, create_group, get_institution_ajax
 from chemicals.views import search_chemicals, add_chemical, chemical_details
-from experiments.views import add_experiment, my_experiments, my_chemicals, my_equipment, add_equipment, add_supplier, experiment_detail
-from measurements.views import monomer_kinetics, upload_file, delete_file, view_3d_graph, view_graph, view_3d_kinetic_graph, monomer_models, all_visualisations
+from experiments.views import add_experiment, my_experiments, my_chemicals, add_reactor, add_supplier, experiment_detail, equipments, insert_equipment, my_reactors
 
+from measurements.views import monomer_kinetics, upload_file, delete_file, view_3d_graph, view_graph, view_3d_kinetic_graph, monomer_models, all_visualisations, delete_supply
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns = [
     path('', home_page, name='home'),
+    path('staff_info/', staff_info, name='staff_info'),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('accounts/me', my_account, name='my_account'),
@@ -21,14 +23,16 @@ urlpatterns = [
     path('experiments/my_experiments', my_experiments, name="my_experiments"),
     path('experiments/my_experiments/add',
          add_experiment, name="add_experiment"),
-    path('experiments/my_experiments/<int:pk>',
+    path('experiments/my_experiments/<int:pk>/<int:error>',
          experiment_detail, name="experiment_detail"),
     path('experiments/my_chemicals', my_chemicals, name="my_chemicals"),
     path('measurements/monomer_kinetics',
          monomer_kinetics, name="monomer_kinetics"),
     path('experiments/my_chemicals/add', add_supplier, name="add_supplier"),
-    path('experiments/my_equipment', my_equipment, name="my_equipment"),
-    path('experiments/my_equipment/add', add_equipment, name="add_equipment"),
+    path('experiments/my_reactors', my_reactors, name="my_reactors"),
+    path('experiments/reactor/add', add_reactor, name="add_reactor"),
+    path('experiments/equipments', equipments, name='equipments'),
+    path('experiments/equipments/add', insert_equipment, name='insert_equipment'),
     path('measurements/upload/<int:pk>', upload_file, name="upload_file"),
     path('measurements/delete/<int:pk>/<int:path>',
          delete_file, name="delete_file"),
@@ -41,10 +45,11 @@ urlpatterns = [
          monomer_models, name='monomer_models'),
     path('measurements/all_visualisations/',
          all_visualisations, name='all_visualisations'),
+    path('measurements/delete/supply/<int:pk>/<int:path>',
+         delete_supply, name='delete_supply'),
 
-     # path('measurements/all_vis/',
-     # all_vis_temp, name='all_visualisations')
 ]
+urlpatterns+= staticfiles_urlpatterns()
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL,
                           document_root=settings.MEDIA_ROOT)

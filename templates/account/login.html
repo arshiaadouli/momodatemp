@@ -15,6 +15,14 @@
         <div class="mb-3">
           {% render_field form.password class="col-sm-12 form-control form-control-lg" %}
         </div>
+        <div>
+          
+        </div>
+        <div style="color:red">
+          {% for key, value in form.errors.items %}
+              <p style="color: tomato;">{% if key != '__all__' %}{{ key }} {% endif %}{{ value }}</p>
+          {% endfor %}
+        </div>
         <div class="mb-3">
           <button type="submit" class="btn btn-primary btn-lg col-sm-12">Log In</button>
         </div>

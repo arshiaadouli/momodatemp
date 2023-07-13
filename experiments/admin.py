@@ -1,7 +1,7 @@
 import imp
 from django.contrib import admin
 
-from .models import Reactor, Experiment, Inventory, Company, Experiment_Chemicals
+from .models import Reactor, Experiment, Inventory, Company, Experiment_Chemicals, Initiator
 
 class ReactorConfig(admin.ModelAdmin):
 
@@ -32,3 +32,4 @@ class ExperimentChemicalsConfig(admin.ModelAdmin):
     list_display = ('experiment', 'inventory', 'type', 'molarity')
 
 admin.site.register(Experiment_Chemicals, ExperimentChemicalsConfig)
+admin.site.register(Initiator)

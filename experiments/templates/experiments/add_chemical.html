@@ -25,8 +25,9 @@
             </div>
 
             <div class="form-floating mb-3">
-            {% render_field form.purity class="form-control" id=form.purity.id_for_label %}
+            {% render_field form.purity class="form-control" id=form.purity.id_for_label oninput="purityRestrictInput()" %}
             <label for="{{ form.purity.id_for_label }}">Purity</label>
+            <p id="purity-error" style="color: red; font-size: xx-small;"></p>
             <div class="text-danger ms-2 small">{% for error in form.purity.errors %} {{ error }} {% endfor %}</div>
             </div>
 
@@ -66,5 +67,17 @@
         $('.select2').select2();
     });
 </script>
+
+<script>
+    function purityRestrictInput() {
+      var input = document.getElementById('id_purity');
+      var value = parseInt(input.value);
+      var purityError = document.getElementById('purity-error')
+      if (isNaN(value) || value < 0 || value > 100) {
+        input.value = '';
+        purityError.innerHTML = 'The purity value should be an integer between 1 to 99'
+      }
+    }
+  </script>
 
 {% endblock scripts %}

@@ -1,0 +1,3 @@
+,Start_min,Stop_min,Volume,StartFR,StopFR,StabilisationTime,DeadVolume1,DeadVolume2,DeadVolume3,NMRInterval,GPCInterval,DilutionFR,DeadVolume1(min),DeadVolume2(min),DeadVolume3(min),Mode
+0,0,15,0.9,0.9,0.06,1.3,0.52,0.21,0.17,17,8,1.5,8.666666667,8.666666667,0.346666667,GPCandNMR
+1,15,30,0.9,0.06,0.03,1.3,0.52,0.21,0.17,17,8,1.5,17.33333333,17.33333333,0.346666667,GPCandNMR

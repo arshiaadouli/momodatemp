@@ -1,14 +1,15 @@
 from django import forms
-from experiments.models import Experiment, Experiment_Chemicals, Reactor, Inventory, Company
+from experiments.models import Experiment, Experiment_Chemicals, Reactor, Inventory, Company, Equipment, cta, Monomer, Initiator
 from users.models import User, User_Group, Group
+from .models import Company
 from chemicals.models import InChi
 
-class AddEquipmentForm(forms.ModelForm):
+class AddReactorForm(forms.ModelForm):
     #we need to pass the request to get the user so we can get all the groups that the user is part of
     #we search the User_Group table for a list of group ids via .values_list('group') and use that list as a filter for Group ids
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
-        super(AddEquipmentForm,self).__init__(*args, **kwargs)
+        super(AddReactorForm,self).__init__(*args, **kwargs)
         self.fields["group"].queryset = Group.objects.filter(id__in=User_Group.objects.filter(user=self.request.user).values_list('group'))
 
     TYPE_CHOICES = (
@@ -24,6 +25,8 @@ class AddEquipmentForm(forms.ModelForm):
     class Meta:
         model = Reactor
         fields = ['name', 'volume', 'type', 'group']
+
+
 
 class AddChemicalForm(forms.ModelForm):
     #we need to pass the request to get the user so we can get all the groups that the user is part of
@@ -45,16 +48,25 @@ class AddChemicalForm(forms.ModelForm):
 
 class AddExperimentForm(forms.ModelForm):
 
-    user = forms.ModelChoiceField(queryset=User.objects.all(), empty_label="---------")     #TODO only yourself as user/ other group members as well?
+    # user = forms.CharField(max_length) 
     date = forms.DateField()
     time = forms.TimeField()
     name = forms.CharField(max_length=127)
     temperature = forms.FloatField()
     total_volume = forms.FloatField()
     reactor = forms.ModelChoiceField(queryset=Reactor.objects.all(), empty_label="---------", required=False)   #TODO only equipment from the group is allowed
+    
+    cta_concentration=forms.FloatField()
+    cta= forms.ModelChoiceField(queryset=cta.objects.all(), empty_label="---------", required=False)
+    
+    initiator_concentration=forms.FloatField()
+    initiator= forms.ModelChoiceField(queryset=Initiator.objects.all(), empty_label="---------", required=False)
+    
+    monomer_concentration=forms.FloatField()
+    monomer= forms.ModelChoiceField(queryset=Monomer.objects.all(), empty_label="---------", required=False)
     class Meta:
         model = Experiment
-        fields = ['user', 'date', 'time', 'name', 'temperature', 'total_volume', 'reactor']
+        fields = ['date', 'time', 'name', 'temperature', 'total_volume', 'reactor', 'cta_concentration', 'cta', 'initiator_concentration', 'initiator', 'monomer_concentration', 'monomer']
 
 class AddIngredientForm(forms.ModelForm):
 
@@ -79,3 +91,20 @@ class AddIngredientForm(forms.ModelForm):
     class Meta:
         model = Experiment_Chemicals
         fields = ['experiment', 'inventory', 'type', 'molarity']
+
+
+
+class AddEquipmentForm(forms.ModelForm):
+    #we need to pass the request to get the user so we can get all the groups that the user is part of
+    #we search the User_Group table for a list of group ids via .values_list('group') and use that list as a filter for Group ids
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
+        super(AddEquipmentForm,self).__init__(*args, **kwargs)
+        self.fields["group"].queryset = Group.objects.filter(id__in=User_Group.objects.filter(user=self.request.user).values_list('group'))
+    serial_number = forms.CharField(max_length=256)
+    vendor = forms.ModelChoiceField(queryset=Company.objects.all(), empty_label="---------", required=False)
+    details = forms.CharField(required=False, max_length=511, widget=forms.Textarea(attrs={"rows":5}))
+
+    class Meta:
+        model = Equipment
+        fields = ['serial_number', 'vendor', 'details', 'group']

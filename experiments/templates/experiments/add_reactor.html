@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col-5">
+        <div class="display-5 mb-4">Add Reactor</div>
+        <form method="post" action="{% url 'add_reactor' %}" novalidate>
+            {% csrf_token %}
+
+            <div class="form-floating mb-3">
+            {% render_field form.name class="form-control" id=form.name.id_for_label oninput="nameRestrictInput()" %}
+            <label for="{{ form.name.id_for_label }}">Name</label>
+            <p style="color:red; font-size: xx-small;" id="name-error"></p>
+            <div class="text-danger ms-2 small">{% for error in form.name.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.volume class="form-control" id=form.volume.id_for_label oninput="volumeRestrictInput()" %}
+            <label for="{{ form.volume.id_for_label }}">Volume (ml)</label>
+            <p style="color:red; font-size: xx-small;" id="volume-error"></p>
+            <div class="text-danger ms-2 small">{% for error in form.volume.errors %} {{ error }} {% endfor %}</div>
+            </div>
+            
+            <div class="form-floating mb-3">
+            {% render_field form.type class="form-control" id=form.type.id_for_label %}
+            <label for="{{ form.type.id_for_label }}">Type</label>
+            <div class="text-danger ms-2 small">{% for error in form.type.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.group class="form-control" id=form.group.id_for_label %}
+            <label for="{{ form.group.id_for_label }}">Group</label>
+            <div class="text-danger ms-2 small">{% for error in form.group.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="mb-3 text-center">
+                <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Save equipment</button>
+                <button type="reset" class="btn btn-outline-secondary col-sm-4">Cancel</button>
+            </div>
+        </form>
+    </div>
+    <div class="col"></div>
+</div>
+
+
+<script>
+    function nameRestrictInput() {
+      var input = document.getElementById('id_name');
+      var value = input.value;
+      console.log(value)
+      var nameError = document.getElementById('name-error');
+
+      if (value.length == 0 || value.length > 40) {
+          input.value = '';
+          nameError.innerHTML="The length of the name should be between 1 to 39 characters."
+      }
+
+    }
+
+
+    function volumeRestrictInput() {
+      var input = document.getElementById('id_volume');
+      var value = parseInt(input.value);
+      var volumeError = document.getElementById('volume-error')
+      
+      if (isNaN(value) || value < 0 || value > 100) {
+          input.value = '';
+          volumeError.innerHTML = "volume must be between 1 and 99."
+      }
+    }
+
+</script>
+
+{% endblock content %}

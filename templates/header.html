@@ -1,31 +1,34 @@
 <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-2 mb-4 border-bottom">
     <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-        <li> <a href={% url 'home' %} class="nav-link px-3 link-dark">Home</a> </li>
-        <li> <a href={% url 'search_chemicals' %} class="nav-link px-3 link-dark">Chemicals</a> </li>
-        <li>
-            <div class="dropdown-center me-2">
-                <a class="btn dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                    My lab
-                </a>
-
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
-                    <li><a class="dropdown-item" href={% url 'my_experiments' %}>Experiments</a></li>
-                    <li><a class="dropdown-item" href={% url 'my_chemicals' %}>Inventory</a></li>
-                    <li><a class="dropdown-item" href={% url 'my_equipment' %}>Equipment</a></li>
-                </ul>
-            </div>
-        </li>
-        <li> <a href={% url 'monomer_kinetics' %} class="nav-link px-3 link-dark">Monomer Kinetics</a> </li>
-        <li> <a href={% url 'monomer_models' %} class="nav-link px-3 link-dark">Models</a> </li>
-        <li> <a href={% url 'all_visualisations' %} class="nav-link px-3 link-dark">All Visualisations</a> </li>
-
+        {% load static %}
+        <li> <a href={% url 'home' %} class="nav-link px-3 link-dark"><img width="40" height="40"src="/static/images/logo.png"/></a> </li>
         {% if user.is_staff %}
+            <li> <a href={% url 'search_chemicals' %} class="nav-link px-3 link-dark">Chemicals</a> </li>
+            <li>
+                <div class="dropdown-center me-2">
+                    <a class="btn dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                        My lab
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
+                        <li><a class="dropdown-item" href={% url 'my_experiments' %}>Experiments</a></li>
+                        <li><a class="dropdown-item" href={% url 'my_chemicals' %}>Inventory</a></li>
+                        <li><a class="dropdown-item" href={% url 'my_reactors' %}>Reactor</a></li>
+                        <li><a class="dropdown-item" href={% url 'equipments' %}>Equipments </a></li>
+                    </ul>
+                </div>
+            </li>
+            <li> <a href={% url 'monomer_kinetics' %} class="nav-link px-3 link-dark">Monomer Kinetics</a> </li>
+            <!-- <li> <a href={% url 'monomer_models' %} class="nav-link px-3 link-dark">Models</a> </li> -->
+            <li> <a href={% url 'all_visualisations' %} class="nav-link px-3 link-dark">All Visualisations</a> </li>
+        {% endif %}
+        {% if user.is_superuser %}
             <li> <a href={% url 'admin:index' %} class="nav-link px-3 link-dark">Admin</a> </li>
         {% endif %}
     </ul>
 
-        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0 text-end">
-        {% if user.is_authenticated %}
+    <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0 text-end">
+        {% if user.is_staff %}
         <li>
             <div class="dropdown me-2">
                 <a class="btn dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
@@ -41,9 +44,18 @@
         </li>
         <li>{% include "account/logout.html" %}</li>
         {% else %}
+            {% if user.is_authenticated %}
+            <li class=""><a class="btn btn-warning" href={% url 'staff_info' %}>Becoming a Staff Member</a></li>
+            <li style="margin-left:10px">{% include "account/logout.html" %}</li>
+            {% endif %}
+        {% endif %}
+        {% if not user.is_authenticated %}
         <li><a class="btn btn-outline-success me-2" href={% url 'account_signup' %}>Sign Up</a></li>
-        <li><a class="btn btn-primary" href={% url 'account_login' %}>Log In</a></li>
-
+        <li><a class="btn btn-primary me-2" href={% url 'account_login' %}>Log In</a></li>
+        <!-- <li>{% include "account/logout.html" %}</li> -->
         {% endif %}
     </ul>
 </header>
+
+
+

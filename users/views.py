@@ -5,9 +5,40 @@ from django.contrib.auth.decorators import login_required
 
 from .forms import CreateGroupForm, CreateInstitutionForm, UpdateUserForm
 from .models import Group, Institution, User_Group
+from django.core.mail import send_mail
 
 def home_page(request):
     return render(request, "home.html")
+
+def staff_info(request):
+    if request.method=="POST":
+        form_data = request.POST
+        first_name = form_data.get('first_name')
+        surname = form_data.get('surname')
+        email = form_data.get('email')
+        message = form_data.get('message')
+        subject = form_data.get('subject')
+
+        body=""""
+        
+        
+        """
+        send_mail(
+            subject,
+            message,
+            email,
+            ["arshiaadouli@gmail.com"],
+            fail_silently=False,
+        )
+
+        context = {
+            'res':True,
+        }
+
+        return render(request, "staff-info.html", context)
+        
+    else:
+        return render(request, "staff-info.html")
 
 @login_required
 def my_account(request):

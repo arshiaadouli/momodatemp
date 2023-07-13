@@ -1,0 +1,6 @@
+<form method='POST' action="{% url 'delete_supply' record.id pk %}">
+    {% csrf_token %}
+    <button type='submit' class='btn btn-outline-danger btn-sm'>
+        <i class="bi bi-trash"></i>
+    </button>
+</form>

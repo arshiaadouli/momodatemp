@@ -133,20 +133,22 @@
           <svg class="bi" width="1em" height="1em"><use xlink:href="#collection"/></svg>
         </div>
         <h2>Monomers for you</h2>
-        <p>Search for the most popular monomers in town! Can't find what you're looking for? Just add it yourself! Now with INCHI, CAS and SMILES support. So much fun!</p>
-        <a href="#" class="icon-link">
-          Find sexy monomers
+        <p>Visualisation of different Monomers</p>
+        {% if user.is_staff%}
+        <a href="/measurements/monomer_kinetics" class="icon-link">
+          Monomer Visualisations
           <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
         </a>
+        {% endif %}
       </div>
       <div class="feature col">
         <div class="feature-icon bg-primary bg-gradient">
           <svg class="bi" width="1em" height="1em"><use xlink:href="#people-circle"/></svg>
         </div>
         <h2>Meet new collegues</h2>
-        <p>Find other chemists and see their work. Compare how your research is still better than theirs. Feel smug about it all day!</p>
-        <a href="#" class="icon-link">
-          Judge your collegues
+        <p>Collaboration Between Users</p>
+        <a href="/accounts/login/" class="icon-link">
+          Login
           <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
         </a>
       </div>
@@ -155,11 +157,13 @@
           <svg class="bi" width="1em" height="1em"><use xlink:href="#toggles2"/></svg>
         </div>
         <h2>Data visualisation</h2>
-        <p>Encounter new ways to visualise your data. Keep on visualising until you find proof for your hypothesis. That's research!</p>
-        <a href="#" class="icon-link">
-          Commit scientific fraud
+        <p>Visualisation Modules Based on PRD group data</p>
+        {% if user.is_staff%}
+        <a href="/measurements/all_visualisations" class="icon-link">
+          All Visualisations
           <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
         </a>
+        {% endif %}
       </div>
     </div>
   </div>

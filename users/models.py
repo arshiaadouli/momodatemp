@@ -3,7 +3,9 @@ from django.utils import timezone
 from django.dispatch import receiver
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from allauth.account.signals import email_changed
-
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.core.mail import send_mail
 class UserManager(BaseUserManager):
 
     def create_user(self, email, first_name, last_name, password, **other_fields):
@@ -16,7 +18,7 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.save()
         return user
-    
+
     def create_superuser(self, email, first_name, last_name, password, **other_fields):             #create a new superuser with >>> python manage.py createsuperuser
 
         other_fields.setdefault('is_staff', True)
@@ -51,6 +53,46 @@ class User(AbstractBaseUser, PermissionsMixin):
 def update_user_email(request, user, from_email_address, to_email_address, **kwargs):
     email = to_email_address
 
+
+@receiver(pre_save, sender=User)
+def send_staff_status_change_email(sender, instance, **kwargs):
+    if instance.pk:
+        original_user = User.objects.get(pk=instance.pk)
+        if original_user.is_staff != instance.is_staff and int(instance.is_staff)==1:
+            send_mail(
+                'Staff Status Change',
+                'Your staff status has been changed. \n you have become a Staff Member of Momoda website',
+                'your_email@example.com',  # Sender's email address
+                [instance.email],  # Recipient's email address
+                fail_silently=False,
+            )
+        if original_user.is_staff != instance.is_staff and int(instance.is_staff)==0:
+            send_mail(
+                'Staff Status Change',
+                'Your staff status has been changed. \n you have been demote to a normal user from a Staff Member of Momoda website',
+                'your_email@example.com',  # Sender's email address
+                [instance.email],  # Recipient's email address
+                fail_silently=False,
+            )
+
+        if original_user.is_superuser != instance.is_superuser and int(instance.is_superuser)==1:
+            send_mail(
+                'Admin Status Change',
+                'Your admin status has been changed. \n you have become an Admin Member of Momoda website',
+                'your_email@example.com',  # Sender's email address
+                [instance.email],  # Recipient's email address
+                fail_silently=False,
+            )
+        if original_user.is_superuser != instance.is_superuser and int(instance.is_superuser)==0:
+            send_mail(
+                'Admin Status Change',
+                'Your admin status has been changed. \n you have been demote to a Staff Member from an Admin of Momoda Website',
+                'your_email@example.com',  # Sender's email address
+                [instance.email],  # Recipient's email address
+                fail_silently=False,
+            )
+
+
 class Group(models.Model):
     #id             = int, primary key, automatically provided
     name            = models.CharField(verbose_name="Research Group", max_length=60)
@@ -68,7 +110,7 @@ class Group(models.Model):
 
 class User_Group(models.Model):
     user            = models.ForeignKey(User, on_delete=models.CASCADE)         #if the user gets deleted, also delete the relationship to the group
-    group           = models.ForeignKey(Group, on_delete=models.CASCADE)        #if the group gets deleted, remove all the people from that group        
+    group           = models.ForeignKey(Group, on_delete=models.CASCADE)        #if the group gets deleted, remove all the people from that group
     is_leader       = models.BooleanField(default=False)                        #set flag for group leader(s), who can manage their members
 
     class Meta:

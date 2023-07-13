@@ -11,15 +11,15 @@
         <form method="post" action="{% url 'add_experiment' %}" novalidate>
             {% csrf_token %}
 
-            <div class="form-floating mb-3">
-            {% render_field form.user class="form-control" id=form.user.id_for_label %}
+            <!-- <div class="form-floating mb-3">
+            {% render_field form.user class="form-control" id=form.user.id_for_label attr='readonly' %}
             <label for="{{ form.user.id_for_label }}">User</label>
             <div class="text-danger ms-2 small">{% for error in form.user.errors %} {{ error }} {% endfor %}</div>
-            </div>
+            </div> -->
 
             <div class="form-floating mb-3">
             {% render_field form.name class="form-control" id=form.name.id_for_label %}
-            <label for="{{ form.name.id_for_label }}">Name</label>
+            <label for="{{ form.name.id_for_label }}">Experiment Name</label>
             <div class="text-danger ms-2 small">{% for error in form.name.errors %} {{ error }} {% endfor %}</div>
             </div>
 
@@ -41,13 +41,13 @@
             </div>
 
             <div class="form-floating mb-3">
-            {% render_field form.temperature class="form-control" id=form.temperature.id_for_label %}
+            {% render_field form.temperature class="form-control" id=form.temperature.id_for_label oninput="temperatureRestrictInput()" %}
             <label for="{{ form.temperature.id_for_label }}">Temperature (ºC)</label>
             <div class="text-danger ms-2 small">{% for error in form.temperature.errors %} {{ error }} {% endfor %}</div>
             </div>
 
             <div class="form-floating mb-3">
-            {% render_field form.total_volume class="form-control" id=form.total_volume.id_for_label %}
+            {% render_field form.total_volume class="form-control" id=form.total_volume.id_for_label oninput="volumeRestrictInput()" %}
             <label for="{{ form.total_volume.id_for_label }}">Total volume (ml)</label>
             <div class="text-danger ms-2 small">{% for error in form.total_volume.errors %} {{ error }} {% endfor %}</div>
             </div>
@@ -58,6 +58,42 @@
             <div class="text-danger ms-2 small">{% for error in form.reactor.errors %} {{ error }} {% endfor %}</div>
             </div>
 
+            <div class="form-floating mb-3">
+              {% render_field form.cta class="form-control" id=form.cta.id_for_label %}
+              <label for="{{ form.cta.id_for_label }}">CTA</label>
+              <div class="text-danger ms-2 small">{% for error in form.cta.errors %} {{ error }} {% endfor %}</div>
+              </div>
+
+            <div class="form-floating mb-3">
+              {% render_field form.cta_concentration class="form-control" id=form.cta_concentration_for_label %}
+              <label for="{{ form.cta_concentration_for_label }}">CTA concentration</label>
+              <div class="text-danger ms-2 small">{% for error in form.cta_concentration.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+              {% render_field form.initiator class="form-control" id=form.initiator.id_for_label %}
+              <label for="{{ form.initiator.id_for_label }}">Initiator</label>
+              <div class="text-danger ms-2 small">{% for error in form.initiator.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+              {% render_field form.initiator_concentration class="form-control" id=form.initiator_concentration_for_label %}
+              <label for="{{ form.initiator_concentration_for_label }}">Initiator concentration</label>
+              <div class="text-danger ms-2 small">{% for error in form.initiator_concentration.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+              {% render_field form.monomer class="form-control" id=form.monomer.id_for_label %}
+              <label for="{{ form.monomer.id_for_label }}">Monomer</label>
+              <div class="text-danger ms-2 small">{% for error in form.monomer.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+              {% render_field form.monomer_concentration class="form-control" id=form.monomer_concentration_for_label %}
+              <label for="{{ form.monomer_concentration_for_label }}">Monomer concentration</label>
+              <div class="text-danger ms-2 small">{% for error in form.monomer_concentration.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
             <div class="mb-3 text-center">
                 <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Save experiment</button>
                 <button type="reset" class="btn btn-outline-secondary col-sm-4">Cancel</button>
@@ -66,4 +102,25 @@
     </div>
     <div class="col"></div>
 </div>
+
+<script>
+    function temperatureRestrictInput() {
+      var input = document.getElementById('id_temperature');
+      var value = parseInt(input.value);
+
+      if (isNaN(value) || value < 0 || value > 100) {
+        input.value = '';
+      }
+    }
+
+
+    function volumeRestrictInput() {
+      var input = document.getElementById('id_total_volume');
+      var value = parseInt(input.value);
+
+      if (isNaN(value) || value < 0 || value > 100) {
+        input.value = '';
+      }
+    }
+  </script>
 {% endblock content %}

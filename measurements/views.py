@@ -1,10 +1,11 @@
 from cmath import e, log
 from django.shortcuts import render, redirect
-from experiments.models import Experiment
+from experiments.models import Experiment, Experiment_Chemicals
 import plotly.express as px
 from measurements.tables import MonomerTable
 from .forms import AddFileForm
-from .models import Measurement, Data, Monomer, Experiment, cta
+from .models import Measurement, Data, Experiment
+from experiments.models import Monomer, cta
 from django.contrib.auth.decorators import login_required
 from plotly.offline import plot
 import plotly.graph_objects as go
@@ -61,8 +62,10 @@ def get_all_cleaned_res_time_conversion_data():
 
     df_data_measurements['rate_measurement_join_column'] = df_data_measurements['measurement_id']
     start=datetime.now()
+    
     df_measurements_measurement_rate_join = df_measurements.set_index('id').join(
         df_data_measurements.set_index('measurement_id'))
+    
     df_experiments_measurement_rate_join = experiment_df.set_index('id').join(
         df_measurements_measurement_rate_join.set_index('experiment_id'))
 
@@ -75,12 +78,12 @@ def get_all_cleaned_res_time_conversion_data():
     # clean data using data jump removal method
     start=datetime.now()
     clean_timesweep_data(df_experiments_cta_join)
-    print("INNER", datetime.now()-start)
+    # print("INNER", datetime.now()-start)
     df_experiments_cta_join.replace('', np.nan, inplace=True)
     df_experiments_cta_join.dropna(inplace=True)
     # df_experiments_cta_join.to_csv(
     #     "/Users/miladnemati/Desktop/df_experiments_cta_join.csv")
-
+    # print(df_experiments_cta_join)
     return df_experiments_cta_join
 
 
@@ -178,6 +181,7 @@ def all_visualisations(request):
     # print(list(df.columns.values))
     # print("Error before clean data fram")
     df = clean_data_frame(df)
+    # print(df['id'])
     # print("Error after clean data fram")
     x = 'Monomer'
     y = 'Residence Time (min)'
@@ -292,9 +296,20 @@ def csv_to_db(file, pk):
     data_conv = data[['conversion', 'tres']]
     data_conv['tres'] = data_conv.apply(
         lambda row: timedelta(minutes=row.tres).total_seconds(), axis=1)
-    data_conv.rename(columns={'conversion': 'Conversion %',
+    data_conv.rename(columns={'conversion': 'conversion',
                      'tres': 'res_time'}, inplace=True)
     data_conv['measurement_id'] = pk
+
+    # print("data_conv", data_conv.head)
+
+    for index, row in data_conv.iterrows():
+        row_data = row.to_dict()
+        
+        # print(row_data['res_time'])
+        # print(row_data['conversion'])
+        # print(row_data['measurement_id'])
+        data = Data(res_time=row_data['res_time'], result=row_data['conversion'], measurement_id=row_data['measurement_id'])
+        data.save()
 
 
 # @ login_required
@@ -306,19 +321,30 @@ def monomer_kinetics(request):
 
     return render(request, "measurements/show3Dplot.html", context)
 
-
+import pandas as pd
+from django.urls import reverse
 # @ login_required
 def upload_file(request, pk):
     if request.method == 'POST':
+        csv_file=request.FILES['file']
+        if not csv_file.name.endswith('.csv'):
+            return redirect('experiment_detail', pk=pk, error= 1)
+        df = pd.read_csv(csv_file)
+        if "Scannumber" not in df.columns:
+
+            # return redirect('experiment_detail', pk=pk, error=True)
+        
+            
+            return redirect('experiment_detail', pk=pk, error= 1)
+            # return render(request, 'experiments/my_experiments.html', {'pk': pk, 'error': True})
         form = AddFileForm(request.POST, request.FILES, pk=pk)
         if form.is_valid():
             m = form.save()
             csv_to_db(m.file, m.pk)
         else:
-            pass
-            # print(form.errors)
+            print(form.errors)
 
-    return redirect('experiment_detail', pk=pk)
+    return redirect('experiment_detail', pk=pk, error= 0)
 
 
 # @ login_required
@@ -327,8 +353,16 @@ def delete_file(request, pk, path):
         file = Measurement.objects.get(pk=pk)
         file.delete()
 
-    return redirect('experiment_detail', pk=path)
+    return redirect('experiment_detail', pk=path, error=0)
 
+
+def delete_supply(request, pk, path):
+    # print("pk", pk)
+    # print("path", path)
+    if request.method == 'POST':
+        supply = Experiment_Chemicals.objects.get(pk=pk)
+        supply.delete()
+    return redirect('experiment_detail', pk=path, error=0)
 
 # @ login_required
 def view_graph(request, pk):
@@ -436,7 +470,9 @@ def plot_2d_kinetic_graph(name):
         font=dict(
             size=20,
         ))
+    
     results = results.iloc[0]["px_fit_results"].summary()
+    print('results', scatter_plot )
     plot_html_output = scatter_plot.to_html()
 
     return plot_html_output

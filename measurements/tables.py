@@ -1,6 +1,7 @@
 from cgitb import html
 from django_tables2 import tables, TemplateColumn
-from .models import Measurement, Monomer
+from .models import Measurement
+from experiments.models import Monomer
 
 
 class MeasurementTable(tables.Table):

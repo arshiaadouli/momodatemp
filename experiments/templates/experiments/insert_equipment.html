@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col-5">
+        <div class="display-5 mb-4">Add equipment</div>
+        <form method="post" action="{% url 'insert_equipment' %}" novalidate>
+            {% csrf_token %}
+
+            
+            <div class="form-floating mb-3">
+                {% render_field form.serial_number class="form-control" id=form.serial_number.id_for_label oninput="serialNumberRestrictInput()" %}
+                <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
+                <p id="serial-number-error" style="color: red; font-size: xx-small;"></p>
+                <div class="text-danger ms-2 small">{% for error in form.serial_number.errors %} {{ error }} {% endfor %}</div>
+            </div>
+            
+            <div class="form-floating mb-3">
+            {% render_field form.vendor class="form-control" id=form.vendor.id_for_label %}
+            <label for="{{ form.vendor.id_for_label }}">Vendor</label>
+            <div class="text-danger ms-2 small">{% for error in form.vendor.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+                {% render_field form.group class="form-control" id=form.group.id_for_label %}
+                <label for="{{ form.group.id_for_label }}">Group</label>
+                <div class="text-danger ms-2 small">{% for error in form.group.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            <div class="form-floating mb-3">
+            {% render_field form.details class="form-control" id=form.details.id_for_label attr="rows=5" %}
+            <label for="{{ form.details.id_for_label }}">Details</label>
+            <div class="text-danger ms-2 small">{% for error in form.details.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+
+            <div class="mb-3 text-center">
+                <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Save equipment</button>
+                <button type="reset" class="btn btn-outline-secondary col-sm-4">Cancel</button>
+            </div>
+        </form>
+    </div>
+    <div class="col"></div>
+</div>
+
+<script>
+    function serialNumberRestrictInput() {
+      var input = document.getElementById('id_serial_number');
+      var value = input.value;
+
+      var serialNumberError = document.getElementById('serial-number-error')
+      
+      if (value.length < 0 || value.length > 40) {
+          input.value = '';
+          serialNumberError.innerHTML = "Serial Number length of characters should be between 1 and 40 characters."
+      }
+    }
+</script>
+{% endblock content %}
