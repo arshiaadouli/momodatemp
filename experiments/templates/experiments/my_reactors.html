@@ -8,16 +8,16 @@
     <div class="col"></div>
     <div class="col-8">
         <div class="display-5 mb-4">Reactors</div>
-        {% if equipment %}
-            {% render_table equipment %}
-        {% else %}
-            <p>You don't have any equipment registered. You can do so <a>here</a></p>
-        {% endif %}
         <div class='text-center mb-4 mt-3'>
             <a href={% url 'add_reactor' %} class='link-primary text-decoration-none'>
                 <strong>Got a fancy new setup? Add it here!</strong>
             </a>
         </div>
+        {% if equipment %}
+            {% render_table equipment %}
+        {% else %}
+            <p>You don't have any equipment registered. You can do so <a>here</a></p>
+        {% endif %}
     </div>
     <div class="col"></div>
 </div>

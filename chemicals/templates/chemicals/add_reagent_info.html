@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+
+
+</style>
+<div class="row container" style="margin:auto; width:50%">
+        <div class="display-5 mb-4">Add Reagent Information</div>
+        <form id="form" method="post">
+            {% csrf_token %}
+            <div class="form-floating mb-3">
+            {% render_field form.name class="form-control" id=form.name.id_for_label %}
+            <label for="{{ form.name.id_for_label }}">Name</label>
+            <div class="text-danger ms-2 small">{% for error in form.name.errors %} {{ error }} {% endfor %}</div>
+            </div>
+
+            {% if not chemical_id %}
+            <div class="form-floating mb-3">
+            {% render_field form.chemical_name class="form-control select2" id=form.chemical_name.id_for_label %}
+            <label for="{{ form.chemical_name.id_for_label }}">Chemical Name</label>
+            <div class="text-danger ms-2 small">{% for error in form.chemical_name.errors %} {{ error }} {% endfor %}</div>
+            </div>
+            {% endif %}
+
+            <div class="form-floating mb-3">
+                {% render_field form.reagent class="form-control select2" id=form.reagent.id_for_label attr=required%}
+                <label for="{{ form.reagent.id_for_label }}">Reagent</label>
+                <div class="text-danger ms-2 small">{% for error in form.Reagent.errors %} {{ error }} {% endfor %}</div>
+            </div>
+            
+
+
+            <div class="mb-3 text-center">
+                <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Save Reagent</button>
+                <button type="reset" class="btn btn-outline-secondary col-sm-4">Cancel</button>
+            </div>
+            <div>
+
+              <!-- {{last_experiment.name}} -->
+            </div>
+        </form>
+</div>
+
+<!-- <script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            theme: 'bootstrap4',
+        });
+
+    });
+</script> -->
+
+{% endblock content %}

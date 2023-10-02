@@ -12,9 +12,12 @@ class CustomSignupForm(SignupForm):
     def save(self, request):
 
         user = super(CustomSignupForm, self).save(request)
-        user.first_name = self.cleaned_data['first_name']
-        user.last_name = self.cleaned_data['last_name']
-        user.save()
+        try:
+            user.first_name = self.cleaned_data['first_name']
+            user.last_name = self.cleaned_data['last_name']
+            user.save()
+        except:
+            pass
         return user
 
 class UpdateUserForm(forms.ModelForm):
@@ -22,8 +25,8 @@ class UpdateUserForm(forms.ModelForm):
     first_name = forms.CharField(min_length=2, max_length=30, required=True)
     last_name = forms.CharField(min_length=2, max_length=30, required=True)
     email = forms.EmailField(max_length=60, required=True)
-    orcid = forms.CharField(label="ORCID", max_length=19, required=False, 
-        validators=[RegexValidator('^\d{4}-\d{4}-\d{4}-(\d{3}X|\d{4})$', message="This is not a valid ORCID. See orcid.org for more info.")], 
+    orcid = forms.CharField(label="ORCID", max_length=19, required=False,
+        validators=[RegexValidator('^\d{4}-\d{4}-\d{4}-(\d{3}X|\d{4})$', message="This is not a valid ORCID. See orcid.org for more info.")],
         widget=forms.TextInput(attrs={'placeholder': '0000-0000-0000-0000'}))
 
     class Meta:

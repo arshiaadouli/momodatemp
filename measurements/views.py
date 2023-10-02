@@ -22,7 +22,8 @@ from sklearn.metrics import mean_squared_error
 from sklearn.tree import DecisionTreeRegressor
 import plotly.graph_objects as go
 from sklearn.ensemble import AdaBoostRegressor
-
+from experiments.decorators import group_required
+from django.contrib import messages
 
 def get_all_rate_data():
     df_experiments_cta_join = get_all_cleaned_res_time_conversion_data()
@@ -35,56 +36,81 @@ def get_all_rate_data():
 
     df_measurement_rate.drop(
         ['res_time', 'result', 'id'], axis=1, inplace=True)
-    df_measurement_rate = df_measurement_rate.drop_duplicates()
+    # df_measurement_rate = df_measurement_rate.drop_duplicates()   # to be removed later
     df_measurement_rate.replace('', np.nan, inplace=True)
     df_measurement_rate.dropna(inplace=True)
     # df_measurement_rate.to_csv("/Users/miladnemati/Desktop/All_rate_data.csv")
-
+    # print(len(df_measurement_rate))
     return df_measurement_rate
 
+# @group_required
 
 def get_all_cleaned_res_time_conversion_data():
-    monomer_info_df = pandas.DataFrame(
-        list(Monomer.objects.values()))
 
-    cta_info_df = pandas.DataFrame(
-        list(cta.objects.values()))
+    experiment_measurement_data = Data.objects.select_related('measurement__experiment')
+    # df=experiment_measurement_data.prefetch_related('measurement__experiment__experiment_reagent_set__reagent_info')
 
-    experiment_df = pandas.DataFrame(
-        list(Experiment.objects.values()))
+    monomer_name=[]
+    cta_name=[]
+    result=[]
+    res_time=[]
+    cta_concentration=[]
+    monomer_concentration=[]
+    temperature=[]
+    d=[]
+    mn=[]
 
-    df_measurements = pandas.DataFrame(
-        list(Measurement.objects.values()))
 
-    df_data_measurements = pandas.DataFrame(
-        list(Data.objects.values()))
-    # print("SCOPEEEEE", datetime.now()-start)
+    for i in experiment_measurement_data:  
+        monomer_bool=False
+        cta_bool=False                    
+        monomer_repeat=False
+        cta_repeat=False
+        for j in range(len(i.measurement.experiment.experiment_reagent_set.all())): 
+            reagent=i.measurement.experiment.experiment_reagent_set.all()[j].reagent_info.reagent.type 
+            if reagent=='Monomer' and not monomer_repeat:
+                monomer_bool=True
+                monomer_name.append(i.measurement.experiment.experiment_reagent_set.all()[j].reagent_info.name)
+                monomer_concentration.append(i.measurement.experiment.experiment_reagent_set.all()[j].concentration)
+                monomer_repeat=True
+                
+            elif reagent=='CTA' and not cta_repeat:
+                cta_bool=True
+                cta_name.append(i.measurement.experiment.experiment_reagent_set.all()[j].reagent_info.name)
+                cta_concentration.append(i.measurement.experiment.experiment_reagent_set.all()[j].concentration)
+                cta_repeat=True
+        if not monomer_bool:
+            monomer_name.append(None)
+            monomer_concentration.append(None)
+        if not cta_bool:
+            cta_name.append(None)
+            cta_concentration.append(None)
+        result.append(i.result)
+        res_time.append(i.res_time)
+        mn.append(i.mn)
+        d.append(i.d)
+        temperature.append(i.measurement.experiment.temperature)
 
-    df_data_measurements['rate_measurement_join_column'] = df_data_measurements['measurement_id']
-    start=datetime.now()
+
+    data = {
+
+        "monomer_name":monomer_name,
+        "cta_name":cta_name,
+        "result":result,
+        "res_time":res_time,
+        "cta_concentration":cta_concentration,
+        "monomer_concentration":monomer_concentration,
+        "temperature":temperature,
+        "Mn":mn,
+        "Đ":d
+    }
+
+
     
-    df_measurements_measurement_rate_join = df_measurements.set_index('id').join(
-        df_data_measurements.set_index('measurement_id'))
-    
-    df_experiments_measurement_rate_join = experiment_df.set_index('id').join(
-        df_measurements_measurement_rate_join.set_index('experiment_id'))
+    df = pd.DataFrame(data)
+    df.fillna(0, inplace=True)
+    return df
 
-    df_experiments_monomer_join = df_experiments_measurement_rate_join.set_index('monomer_id').join(
-        monomer_info_df.set_index('id').add_prefix('monomer_'))
-    
-    df_experiments_cta_join = df_experiments_monomer_join.set_index('cta_id').join(
-        cta_info_df.set_index('id').add_prefix('cta_'))
-
-    # clean data using data jump removal method
-    start=datetime.now()
-    clean_timesweep_data(df_experiments_cta_join)
-    # print("INNER", datetime.now()-start)
-    df_experiments_cta_join.replace('', np.nan, inplace=True)
-    df_experiments_cta_join.dropna(inplace=True)
-    # df_experiments_cta_join.to_csv(
-    #     "/Users/miladnemati/Desktop/df_experiments_cta_join.csv")
-    # print(df_experiments_cta_join)
-    return df_experiments_cta_join
 
 
 def determine_rate_of_data_subset(data_subset):
@@ -136,34 +162,45 @@ def remove_data_jumps(df_time_result):
 
 
 def clean_timesweep_data(monomer_conversion: pandas.DataFrame):
+    # print('monomer_conversion', monomer_conversion)
     df = monomer_conversion[['monomer_name',
-                             'cta_name', 'cta_concentration', 'temperature']]
+                             'cta_name', 'cta_concentration']]
+    # df = monomer_conversion[['monomer_name',
+    #                      'cta_name', 'cta_concentration', 'temperature']]
     list_df = df.values.tolist()
     unique_rows = np.unique(list_df, axis=0)
     start=datetime.now()
-    # print(unique_rows)
-    # print(monomer_conversion)
+
     for row in unique_rows:
+        
         data_slice = monomer_conversion.loc[(
             monomer_conversion['monomer_name'] == row[0]) & (monomer_conversion['cta_name']
-                                                             == row[1]) & (monomer_conversion['cta_concentration'] == row[2]) & (monomer_conversion['temperature'] == row[3])]
+                                                             == row[1]) & (monomer_conversion['cta_concentration'] == row[2])]
 
         monomer_conversion.loc[(
             monomer_conversion['monomer_name'] == row[0]) & (monomer_conversion['cta_name']
-                                                             == row[1]) & (monomer_conversion['cta_concentration'] == row[2]) & (monomer_conversion['temperature'] == row[3])] = remove_data_jumps(data_slice)
-
-
-    # unique_rows = df.drop_duplicates(subset=['monomer_name', 'cta_name', 'cta_concentration', 'temperature'])
-    # unique_rows = remove_data_jumps(unique_rows)
-    # print(len(unique_rows))
-    # print(len(monomer_conversion))
-    # print("clean data", datetime.now()-start)
+                                                             == row[1]) & (monomer_conversion['cta_concentration'] == row[2]) ] = remove_data_jumps(data_slice)
     return
 
 
 def clean_data_frame(df):
+
     df.rename(columns={
-        "monomer_name": "Monomer", 'cta_name': 'Chain Transfer Agent', 'res_time': 'Residence Time (min)', 'temperature': 'Temperature (°C)', "result": "Conversion %"}, inplace=True)
+        "monomer_name": "Monomer", 'cta_name': 'Chain Transfer Agent', 'res_time': 'Residence Time (min)', "result": "Conversion %"}, inplace=True)
+    
+
+    df.rename(columns={
+    "monomer_name": "Monomer", 'cta_name': 'Chain Transfer Agent', 'res_time': 'Residence Time (min)', 'temperature': 'Temperature (°C)', "result": "Conversion %"}, inplace=True)
+
+
+    df.rename(columns={
+        "monomer_name": "Monomer", 'cta_name': 'Chain Transfer Agent', 'res_time': 'Residence Time (min)', "result": "Conversion %"}, inplace=True)
+    
+
+
+
+
+
     df = modify_axis_all_visualisations(
         df, 'Residence Time (min)', "round((float(x)/60),3)")
     df = modify_axis_all_visualisations(
@@ -173,16 +210,22 @@ def clean_data_frame(df):
 
 from datetime import datetime
 @ csrf_exempt
-# @ login_required
+@ login_required
+@group_required
+
 def all_visualisations(request):
     start=datetime.now()
     df = get_all_cleaned_res_time_conversion_data()
-    # print("TIMEEEE", datetime.now()-start)
-    # print(list(df.columns.values))
-    # print("Error before clean data fram")
+    # print('df', list(df['cta_name']))
+
+    # count =0
+    # for i in range(len(df)):
+    #     if df['cta_name'][i] and df['monomer_name'][i]:
+    #         count+=1
+    # print("count", count)
+
+
     df = clean_data_frame(df)
-    # print(df['id'])
-    # print("Error after clean data fram")
     x = 'Monomer'
     y = 'Residence Time (min)'
     z = 'Conversion %'
@@ -196,33 +239,38 @@ def all_visualisations(request):
         x = request.POST.get("choose_x")
         y = request.POST.get("choose_y")
         z = request.POST.get("choose_z")
-        x = request.POST.get("choose_x")
+        # x = request.POST.get("choose_x")
         color = request.POST.get("choose_colour")
         symbol = request.POST.get("choose_marker")
+        # 
         x_input = request.POST.get("x-input")
         y_input = request.POST.get("y-input")
         z_input = request.POST.get("z-input")
+
+
+
         df = modify_axis_all_visualisations(df, x, x_input)
         df = modify_axis_all_visualisations(df, y, y_input)
         df = modify_axis_all_visualisations(df, z, z_input)
 
-    
+
+    # print("df", df)
+
     three_d_graph = px.scatter_3d(df, x,
                                   y, z, color, symbol)
+    three_d_graph.update_traces(showlegend=False)
+    # three_d_graph.update_layout(legend_orientation="h")
     three_d_graph = three_d_graph.to_html()
 
-    column_names = ['cta_concentration', 'monomer_concentration', 'initiator_concentration',
-                    'Temperature (°C)', 'Residence Time (min)', 'Conversion %', 'Chain Transfer Agent', 'Monomer']
-    # time2=datetime.now()-second
-    # print(time2)
+    column_names = ['cta_concentration', 'monomer_concentration', 'Residence Time (min)', 'Conversion %', 'Chain Transfer Agent', 'Monomer', 'Đ', 'Mn']
+
     context = {
 
         'plot_3d_graph': three_d_graph,
         'column_names': column_names
 
     }
-    end=datetime.now()
-    # print("TIMEEEEEEEEEEEE", end-start)
+
     return render(request, "measurements/all_visualisations.html", context)
 
 
@@ -255,7 +303,9 @@ def predict_from_model(fit, input):
 
 
 @ csrf_exempt
-# @ login_required
+@ login_required
+@group_required
+
 def monomer_models(request):
 
     df_experiments_cta_join = get_all_rate_data()
@@ -290,31 +340,43 @@ def monomer_models(request):
 
 
 def csv_to_db(file, pk):
+    if file.name.endswith('.csv') :
+        data = pandas.read_csv(file.file, encoding='UTF-8')
 
-    data = pandas.read_csv(file.file, encoding='UTF-8')
     data.dropna(subset=['conversion', 'tres'], inplace=True)
-    data_conv = data[['conversion', 'tres']]
+    data_conv = data[['conversion', 'tres', 'D', 'Mn']]
     data_conv['tres'] = data_conv.apply(
         lambda row: timedelta(minutes=row.tres).total_seconds(), axis=1)
     data_conv.rename(columns={'conversion': 'conversion',
                      'tres': 'res_time'}, inplace=True)
     data_conv['measurement_id'] = pk
 
-    # print("data_conv", data_conv.head)
-
     for index, row in data_conv.iterrows():
         row_data = row.to_dict()
         
-        # print(row_data['res_time'])
-        # print(row_data['conversion'])
-        # print(row_data['measurement_id'])
-        data = Data(res_time=row_data['res_time'], result=row_data['conversion'], measurement_id=row_data['measurement_id'])
+        data = Data(res_time=row_data['res_time'], result=row_data['conversion'], d=row_data['D'], mn=row_data['Mn'] ,measurement_id=row_data['measurement_id'])
         data.save()
 
+from experiments.models import Reagent_Info, Reagent, Experiment_Reagent
+@ login_required
+@group_required
 
-# @ login_required
 def monomer_kinetics(request):
-    monomers = MonomerTable(Monomer.objects.all())
+    # print(Reagent_Info.objects.filter(reagent=0))
+    monomers = MonomerTable(Experiment_Reagent.objects.filter(reagent_info__in=Reagent_Info.objects.filter(reagent=1)))
+    # monomers = Reagent_Info.objects.filter(reagent=1)
+
+
+    # print(Reagent_Info.objects.filter(reagent=0))
+    monomers=[]
+    query = Reagent_Info.objects.filter(reagent=1)
+    for i in query:
+        if i.experiment_reagent_set.all():
+            monomers.append(i)
+
+    monomers=MonomerTable(monomers)
+
+
     context = {
         'monomer': monomers,
     }
@@ -323,18 +385,19 @@ def monomer_kinetics(request):
 
 import pandas as pd
 from django.urls import reverse
-# @ login_required
+@ login_required
+@group_required
+
 def upload_file(request, pk):
+    print("error occured")
     if request.method == 'POST':
         csv_file=request.FILES['file']
-        if not csv_file.name.endswith('.csv'):
+        if csv_file.name.endswith('.csv') :
+            df = pd.read_csv(csv_file)
+        else:
             return redirect('experiment_detail', pk=pk, error= 1)
-        df = pd.read_csv(csv_file)
-        if "Scannumber" not in df.columns:
 
-            # return redirect('experiment_detail', pk=pk, error=True)
-        
-            
+        if "Mn" not in df.columns or "D" not in df.columns or "tres" not in df.columns or "conversion" not in df.columns:            
             return redirect('experiment_detail', pk=pk, error= 1)
             # return render(request, 'experiments/my_experiments.html', {'pk': pk, 'error': True})
         form = AddFileForm(request.POST, request.FILES, pk=pk)
@@ -347,7 +410,9 @@ def upload_file(request, pk):
     return redirect('experiment_detail', pk=pk, error= 0)
 
 
-# @ login_required
+@ login_required
+@group_required
+
 def delete_file(request, pk, path):
     if request.method == 'POST':
         file = Measurement.objects.get(pk=pk)
@@ -355,6 +420,7 @@ def delete_file(request, pk, path):
 
     return redirect('experiment_detail', pk=path, error=0)
 
+@group_required
 
 def delete_supply(request, pk, path):
     # print("pk", pk)
@@ -364,13 +430,18 @@ def delete_supply(request, pk, path):
         supply.delete()
     return redirect('experiment_detail', pk=path, error=0)
 
-# @ login_required
+@ login_required
+@group_required
+
 def view_graph(request, pk):
 
     df = pandas.DataFrame(
         list(Data.objects.filter(measurement_id=pk).values()))
+    if not 'res_time' in df.columns:
+        exp_id = Measurement.objects.filter(id=pk).values_list('experiment_id', flat=True)[0]
+        messages.error(request, 'Please add data to your csv filename first.')
+        return redirect('experiment_detail', pk=exp_id, error=0)
     name = Measurement.objects.get(id=pk).experiment.name
-
     graph_conv = go.Scatter(x=df.res_time, y=df.result, mode='markers')
 
     # pad for centering and round to nearest 100
@@ -400,8 +471,9 @@ def view_graph(request, pk):
     return render(request, "measurements/view_graph.html", context)
 
 
-def get_CTA_reaction_data(request, name):
-    finale_merged_data = get_all_cleaned_res_time_conversion_data()
+def get_CTA_reaction_data(request, name, all_data):
+    finale_merged_data = all_data
+    # print("finale_merged_data", finale_merged_data['monomer_name'])
     filtered_data_experiments = finale_merged_data.loc[finale_merged_data['monomer_name'] == name]
 
     return filtered_data_experiments
@@ -423,7 +495,6 @@ def get_axis(list_data):
 
 
 def modify_axis_all_visualisations(data, axis_label, axis_input):
-
     new_data = list(data[axis_label])
 
     try:
@@ -455,38 +526,40 @@ def get_axis_data(list_data):
     return data
 
 
-def plot_2d_kinetic_graph(name):
-    all_data = get_all_rate_data()
+def plot_2d_kinetic_graph(name, all_data):
+    # all_data = get_all_cleaned_res_time_conversion_data()
     data_subset = all_data.loc[all_data['monomer_name'] == name]
     data_subset['Temperature (°C)'] = pandas.to_numeric(
         data_subset['temperature'])
-    data_subset['Rate(1/s)'] = pandas.to_numeric(data_subset['rate(s^-1)'])
-
+    # data_subset['Rate(1/s)'] = pandas.to_numeric(data_subset['rate(s^-1)'])
+    # print("data_subset", data_subset)
     scatter_plot = px.scatter(data_subset,
-                              x='Temperature (°C)', y='Rate(1/s)', color='cta_name', symbol='cta_concentration', trendline='ols', trendline_scope='overall')
+                              x='Temperature (°C)', y='cta_concentration', color='cta_name', symbol='cta_concentration', trendline='ols', trendline_scope='overall')
     scatter_plot.update_traces(marker=dict(size=12))
     results = px.get_trendline_results(scatter_plot)
     scatter_plot.update_layout(
         font=dict(
             size=20,
         ))
-    
-    results = results.iloc[0]["px_fit_results"].summary()
-    print('results', scatter_plot )
+
+    try:
+        results = results.iloc[0]["px_fit_results"].summary()
+    except:
+        pass
     plot_html_output = scatter_plot.to_html()
 
     return plot_html_output
 
 
-def plot_3d_kinetic_graph(name):
-    all_data = get_all_rate_data()
+def plot_3d_kinetic_graph(name, all_data):
+    # all_data = get_all_cleaned_res_time_conversion_data()
     data_subset = all_data.loc[all_data['monomer_name'] == name]
     data_subset['Temperature (°C)'] = pandas.to_numeric(
         data_subset['temperature'])
-    data_subset['Rate(1/s)'] = pandas.to_numeric(data_subset['rate(s^-1)'])
+    # data_subset['Rate(1/s)'] = pandas.to_numeric(data_subset['rate(s^-1)'])
 
     fig = px.scatter_3d(data_subset, x='Temperature (°C)',
-                        y='Rate(1/s)', z='cta_concentration', color="cta_name")
+                        y='Temperature (°C)', z='cta_concentration', color="cta_name")
     fig.update_traces(marker=dict(size=5),
                       selector=dict(mode='markers'))
     fig.update_layout(
@@ -509,11 +582,19 @@ def plot_3d_graph(df):
 
 
 @ csrf_exempt
-# @ login_required
+@ login_required
+@group_required
+
 def view_3d_graph(request, name):
-    list_data = get_CTA_reaction_data(request, name)
+    all_data = get_all_cleaned_res_time_conversion_data()
+
+    list_data = get_CTA_reaction_data(request, name, all_data)
+
+    # print("listdata", list_data)
     data = get_axis_data(list_data)
     df = pandas.DataFrame(data)
+
+    # print("df", df)
 
     axis = [
         "Temperature (°C)",
@@ -533,6 +614,9 @@ def view_3d_graph(request, name):
         df = modify_axis_all_visualisations(df, left_axis, left_input)
         df = modify_axis_all_visualisations(df, middle_axis, middle_input)
         df = modify_axis_all_visualisations(df, right_axis, right_input)
+
+
+
     plot_3d = plot_3d_graph(df)
     context = {
         'plot_3d_graph': plot_3d,
@@ -543,19 +627,27 @@ def view_3d_graph(request, name):
 
     return render(request, 'measurements/3D_graph.html', context)
 
-
+import time
 @ csrf_exempt
-# @ login_required
-def view_3d_kinetic_graph(request, name):
+@ login_required
+@group_required
 
-    list_data = get_CTA_reaction_data(request, name)
+def view_3d_kinetic_graph(request, name):
+    all_data = get_all_cleaned_res_time_conversion_data()
+    list_data = get_CTA_reaction_data(request, name, all_data)
+
+
     temperature, y, z, cx_ratio, CTA = get_axis(list_data)
     data = get_axis_data(list_data)
 
+
     df = pandas.DataFrame(data)
     # print(df)
+
+
     k = "rate constant"
     CTA_list = set(CTA)
+    # print("df", CTA_list)
     temperature_list = set(temperature)
 
     reaction_orders = [
@@ -569,17 +661,22 @@ def view_3d_kinetic_graph(request, name):
         CTA_chosen = request.POST.get("CTA")
         Temperature_chosen = request.POST.get("temperature")
         cx_ratio_chosen = request.POST.get("cta_concentration")
-
-        df = df.loc[(df['temperature(C)'] == float(Temperature_chosen)) & (
+        # print(df.columns)
+        df = df.loc[(df['Temperature (°C)'] == float(Temperature_chosen)) & (
             df['Chain Transfer Agent'] == CTA_chosen) & (
-            df['cta_concentration'] == float(cx_ratio_chosen))]
+            df['CTA concentration (M)'] == float(cx_ratio_chosen))]
         try:
             k = determine_rate_of_data_subset(df)
         except:
             print("not valid")
-    two_d_graph = plot_2d_kinetic_graph(name)
-    three_d_rate_graph = plot_3d_kinetic_graph(name)
+    start = time.time()
+
+   
+
+    two_d_graph = plot_2d_kinetic_graph(name, all_data)
+    three_d_rate_graph = plot_3d_kinetic_graph(name, all_data)
     three_d_graph = plot_3d_graph(df)
+
     context = {
         'temperature_list': temperature_list,
         'CTA_list': CTA_list,
@@ -591,5 +688,10 @@ def view_3d_kinetic_graph(request, name):
         'cta_concentration': cx_ratio,
         'k': k
     }
+    print("TIME ", time.time() - start)
 
     return render(request, 'measurements/kinetic_view.html', context)
+
+
+
+    

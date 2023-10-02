@@ -1,6 +1,6 @@
 import django_tables2 as tables
-from .models import Experiment, Experiment_Chemicals, Reactor, Inventory, Equipment
-from django_tables2 import tables, TemplateColumn
+from .models import Experiment, Experiment_Chemicals, Reactor, Inventory, Equipment, Experiment_Reagent
+# from django_tables2 import tables, TemplateColumn
 class ExperimentTable(tables.Table):
     class Meta:
         model = Experiment
@@ -16,11 +16,10 @@ class SupplierTable(tables.Table):
 
 class SuppliesTable(tables.Table):
 
-    delete = TemplateColumn(template_name='measurements/delete_supply_button.html',
-                            verbose_name='', attrs={'td': {'align': 'right'}})
+
     class Meta:
-        model = Experiment_Chemicals
-        fields = ("inventory", "type", "molarity")
+        model = Experiment
+        fields = ("name", "temperature", "reactor", "total_volume")
 
 class ReactorTable(tables.Table):
     class Meta:
@@ -33,3 +32,20 @@ class EquipmentTable(tables.Table):
         model = Equipment
         fields = ("group", "vendor", "serial_number", "details")
         #attrs = {"class": "table table-hover"}    #disabled while not clickable
+
+class ArrayColumn(tables.Column):
+    def __init__(self, index, *args, **kwargs):
+        self.index = index
+        super(ArrayColumn, self).__init__(*args, **kwargs)
+
+    def render(self, value, record, **kwargs):
+        if value is None or len(value) <= self.index:
+            return ''
+        return str(value[self.index])
+
+class ExperimentReagentTable(tables.Table):
+
+    class Meta:
+        model = Experiment_Reagent
+        fields = ('reagent_info', 'concentration', 'ratio')
+        attrs = {"class": "table table-hover"}    #disabled while not clickable

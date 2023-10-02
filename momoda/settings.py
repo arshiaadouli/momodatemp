@@ -37,7 +37,7 @@ SECRET_KEY = 'django-insecure-#^^xx&y*(*i5y_@)6+%4p-9%8-7$@%h%8u+o%^tqpf(1w28_m)
 # SECURITY WARNING: don't run with debug turned on in production!dsad
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['momoda.pythonanywhere.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -98,7 +98,7 @@ WSGI_APPLICATION = 'momoda.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME':"test2",
+        'NAME':"test3",
         'USER': 'root',
         'PASSWORD': "",
         'HOST': "localhost",

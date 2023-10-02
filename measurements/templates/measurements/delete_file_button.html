@@ -5,6 +5,13 @@
         onclick="location.href='{% url 'view_graph' record.id %}'">
         <i class="bi bi-graph-up"></i>
     </button>
+
+    <button type='button' 
+    class='btn btn-outline-primary btn-sm'
+    onclick="location.href='{% url 'add_csv_data' record.id %}'">
+    <i class="bi bi-file-earmark-excel"></i>
+    </button>
+
     <button type='submit' class='btn btn-outline-danger btn-sm'>
         <i class="bi bi-trash"></i>
     </button>

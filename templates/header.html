@@ -2,6 +2,7 @@
     <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
         {% load static %}
         <li> <a href={% url 'home' %} class="nav-link px-3 link-dark"><img width="40" height="40"src="/static/images/logo.png"/></a> </li>
+
         {% if user.is_staff %}
             <li> <a href={% url 'search_chemicals' %} class="nav-link px-3 link-dark">Chemicals</a> </li>
             <li>
@@ -11,10 +12,11 @@
                     </a>
 
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
-                        <li><a class="dropdown-item" href={% url 'my_experiments' %}>Experiments</a></li>
-                        <li><a class="dropdown-item" href={% url 'my_chemicals' %}>Inventory</a></li>
-                        <li><a class="dropdown-item" href={% url 'my_reactors' %}>Reactor</a></li>
-                        <li><a class="dropdown-item" href={% url 'equipments' %}>Equipments </a></li>
+                        <li><a class="dropdown-item" href={% url 'my_experiments' %}>My Experiments</a></li>
+                        <!-- <li><a class="dropdown-item" href={% url 'my_chemicals' %}>Chemical Inventory</a></li> -->
+                        <li><a class="dropdown-item" href={% url 'my_reactors' %}>Reactor Inventory</a></li>
+                        <li><a class="dropdown-item" href={% url 'equipments' %}>Equipments Inventory</a></li>
+                        <li><a class="dropdown-item" href={% url 'add_reagent_info' %}>Add Reagents</a></li>
                     </ul>
                 </div>
             </li>
@@ -42,6 +44,7 @@
                 </ul>
             </div>
         </li>
+
         <li>{% include "account/logout.html" %}</li>
         {% else %}
             {% if user.is_authenticated %}
@@ -55,6 +58,8 @@
         <!-- <li>{% include "account/logout.html" %}</li> -->
         {% endif %}
     </ul>
+
+
 </header>
 
 

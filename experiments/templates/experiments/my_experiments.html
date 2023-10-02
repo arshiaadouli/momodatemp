@@ -14,7 +14,44 @@
             </a>
         </div>
         {% if experiments %}
-            {% render_table experiments %}
+        <table class="table table-hover">
+            
+            
+            <thead>
+                <tr>
+                    <th class="orderable">    
+                            <a href="?sort=reagent_info">User</a>
+                    </th>
+                
+                    <th class="orderable">
+                            <a href="?sort=concentration">Name</a>
+                    </th>
+                
+                    <th class="orderable">
+                            <a href="?sort=ratio">Temperature</a>
+                    </th>
+
+                    <th class="orderable">
+                        <a href="?sort=ratio">Volume (ml)</a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in experiments %}
+                <tr class="even" onclick="document.location.href='/experiments/my_experiments/{{i.id}}/0'">
+                    <td>{{i.user}}</td>
+                    <td>{{i.name}}</td>
+                    <td>{{i.total_volume}}</td>
+                    <td>{{i.temperature}}</td>
+                    {% if is_leader%}
+                        <td><a href="{% url 'delete-experiment' i.id%}"><button class="btn btn-danger"><i class="bi bi-trash"></i></button></a></td>
+                        <!-- <td><a href="{% url 'edit-experiment' i.id%}"><button class="btn btn-primary">Edit</button></a></td> -->
+                    {% endif %}
+                </tr>
+                
+                {% endfor %}
+            </tbody>
+    </table>
         {% else %}
             <p>You don't have any experiments logged. You can do so below</p>
         {% endif %}

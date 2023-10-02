@@ -4,8 +4,8 @@ from django.contrib import admin
 from django.urls import path, include
 from users.views import staff_info, home_page, my_account, research_group, create_group, get_institution_ajax
 from chemicals.views import search_chemicals, add_chemical, chemical_details
-from experiments.views import add_experiment, my_experiments, my_chemicals, add_reactor, add_supplier, experiment_detail, equipments, insert_equipment, my_reactors
-
+from experiments.views import *
+from chemicals.views import add_reagent_info
 from measurements.views import monomer_kinetics, upload_file, delete_file, view_3d_graph, view_graph, view_3d_kinetic_graph, monomer_models, all_visualisations, delete_supply
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns = [
@@ -47,8 +47,36 @@ urlpatterns = [
          all_visualisations, name='all_visualisations'),
     path('measurements/delete/supply/<int:pk>/<int:path>',
          delete_supply, name='delete_supply'),
+     path('experiment-test',
+         experiment_test, name='experiment_test'),
+
+     path('delete-reagent/<int:object_id>/',
+         delete_reagent, name='delete-reagent'),
+
+     path('delete-experiment/<int:object_id>/',
+         delete_experiment, name='delete-experiment'),
+
+     path('delete-data/<int:item>/<int:fk>',
+         delete_data, name='delete-data'),
+
+     
+     path('edit-data/<int:pk>/<int:fk>',
+         edit_data, name='edit-data'),
+
+     path('edit-experiment/<int:item_id>/',
+         edit_experiment, name='edit-experiment'),
+
+     path('edit-experiment/<int:item_id>/',
+         edit_experiment, name='edit-experiment'),
+
+     path('add-reagent-info/', add_reagent_info, name='add_reagent_info'),
+     path('add-reagent-info/<int:chemical_id>', add_reagent_info, name='add_reagent_info_chemical'),
+
+     path('add-csv-data/<int:pk>', add_csv_data, name='add_csv_data')
 
 ]
+
+
 urlpatterns+= staticfiles_urlpatterns()
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL,

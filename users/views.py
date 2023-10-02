@@ -13,16 +13,16 @@ def home_page(request):
 def staff_info(request):
     if request.method=="POST":
         form_data = request.POST
-        first_name = form_data.get('first_name')
-        surname = form_data.get('surname')
-        email = form_data.get('email')
+        # first_name = form_data.get('first_name')
+        # surname = form_data.get('surname')
+        email = request.user.email
         message = form_data.get('message')
-        subject = form_data.get('subject')
+        subject = form_data.get('subject') + '  ['+ email +']'
 
-        body=""""
-        
-        
-        """
+        # body=""""
+
+
+        # """
         send_mail(
             subject,
             message,
@@ -36,7 +36,7 @@ def staff_info(request):
         }
 
         return render(request, "staff-info.html", context)
-        
+
     else:
         return render(request, "staff-info.html")
 
@@ -49,17 +49,21 @@ def my_account(request):
             form.save()
             messages.success(request, 'Your profile was successfully updated')
             return redirect(to='my_account')
-            
+
     else:
         form = UpdateUserForm(instance=request.user)
+        try:
+            group = User_Group.objects.get(user=request.user.id)
+        except:
+            messages.error(request, 'You must create a group or ask a leader to invite you before accessing to webpages.')
 
     groups = User_Group.objects.filter(user=request.user.id).order_by('-is_leader')
-    
+
     context = {
         'form': form,
         'groups': groups,
     }
-    
+
     return render(request, "users/account.html", context)
 
 @login_required
@@ -109,7 +113,7 @@ def create_group(request):
 
 @login_required
 def get_institution_ajax(request):                                              #get all data needed to fill the form when picking an institution from the dropdown menu
-    
+
     pk = request.GET.get('pk', None)
     inst = Institution.objects.get(id=pk)
 

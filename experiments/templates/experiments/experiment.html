@@ -5,6 +5,18 @@
 {% load render_table from django_tables2 %}
 
 {% block content %}
+<style>
+    .error{
+        color:tomato
+    }
+    tr td a {
+        text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit color from parent */
+    pointer-events: none; /* Make it non-clickable */
+    cursor: not-allowed; /* Change cursor to indicate it's not clickable */
+    /* Remove or modify other styles as needed */
+    }
+</style>
 <div class="row">
     <div class="col"></div>
     <div class="col-8">
@@ -14,29 +26,178 @@
         {% if supplies %}
             {% render_table supplies %}
         {% endif %}
-        <form method="post" action="{% url 'experiment_detail' pk error %}" novalidate>
+
+
+
+        <div class="display-5 mt-5 mb-1">Reagents</div>
+        <table class="table table-hover"> 
+            <thead>
+            <tr>
+                <th class="orderable">    
+                    <a href="?sort=reagent_info">Reagent info</a>        
+                </th>
+                <th class="orderable">    
+                    <a href="?sort=concentration">Concentration</a>        
+                </th>
+                <th class="orderable">        
+                    <a href="?sort=ratio">Ratio</a>        
+                </th>
+
+                <th class="orderable">
+                    <a href="?sort=ratio">Action</a>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for i in reagents_ratio %}
+                <tr class="even">
+                    <td>{{i.reagent_info}}</td>
+                    <td>{{i.concentration}}</td>
+                    <td>{{i.ratio}}</td>
+                    <td><a href="{% url 'delete-reagent' i.id%}"><button class="btn btn-danger"><i class="bi bi-trash"></i></button></a></td>
+                </tr>                
+                {% endfor %}
+
+            </tbody>
+    </table>
+
+
+
+
+        <!-- {% if experimentReagentTable %}
+            {% render_table experimentReagentTable %}
+        {% endif %} -->
+
+
+
+
+        <form method="post" action="{% url 'experiment_detail' pk error %}" >
             {% csrf_token %}
 
             <div class="row mb-3">
-                <div class="col-7">
+                <div class="col-8">
+                    
                     {% render_field form.experiment id=form.experiment.id_for_label hidden=True %}
-                    {% render_field form.inventory class="form-control select2" id=form.inventory.id_for_label %}
-                    <div class="text-danger ms-2 small">{% for error in form.inventory.errors %} {{ error }} {% endfor %}</div>
+                    <!-- <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search keyword..."> -->
+                    <label for="exampleFormControlInput1" class="mb-3">Reagent</label>
+                    {% render_field form.reagent_info class="form-control select2" id=form.reagent_info.id_for_label attr=required%}
+                    <p style="color: tomato; font-size: x-small;" id="concentration-error"></p>
+                    <div class="text-danger ms-2 small">{% for error in form.reagent_info.errors %} {{ error }} {% endfor %}</div>
                 </div>
-                <div class="col-2">
-                    {% render_field form.type class="form-control" id=form.type.id_for_label %}
-                    <div class="text-danger ms-2 small">{% for error in form.type.errors %} {{ error }} {% endfor %}</div>
+                <div class="col-4">
+                    <label for="exampleFormControlInput1" class="mb-3">Concentration(M)</label>
+                    {% render_field form.concentration class="form-control" id=form.concentration.id_for_label attr=required  oninput="concentrationRestrictInput()" %}
+                    <div class="text-danger ms-2 small">{% for error in form.concentration.errors %} {{ error }} {% endfor %}</div>
                 </div>
-                <div class="col-2">
-                    {% render_field form.molarity class="form-control" id=form.molarity.id_for_label %}
-                    <div class="text-danger ms-2 small">{% for error in form.molarity.errors %} {{ error }} {% endfor %}</div>
-                </div>
+                
             </div>
             <div class="mb-5">
-                <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Add chemical</button>
+                <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Add Reagent</button>
             </div>
         </form>
+        
+        
         <div class="display-5 mt-5 mb-1">Data files</div>
+        <!-- <div style="        
+        margin: 4px, 4px;
+        padding: 4px;
+        height: 300px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        white-space: nowrap;">
+    
+            <table class="table table-hover"> 
+                <thead>
+                    <tr>
+                        
+                        <th class="orderable">    
+                            <a>Tres</a>        
+                        </th>
+                        <th class="orderable">    
+                            <a>Conversion</a>        
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    {% for i in data_table %}
+                    <tr class="even">
+                        
+                        <td>{{i.res_time}}</td>
+                        <td>{{i.result}}</td>
+                        
+                        <td><a href="#"><button class="btn btn-danger"><i class="bi bi-pencil"></i></button></a></td>
+                        <td><a href="{% url 'delete-data' i.id experiment.id%}"><button class="btn btn-danger"><i class="bi bi-trash"></i></button></a></td>
+                    </tr>                
+                    {% endfor %}
+    
+                </tbody>
+            </table>
+            
+        </div> -->
+
+        <form method="post" action="{% url 'experiment_detail' pk error %}" >
+            {% csrf_token %}
+
+            <div class="row mb-3">
+                <div class="col-8">
+                    <label for="exampleFormControlInput1" class="mb-3">Filename</label>
+                    {% render_field form_filename.file class="form-control" id=form_filename.file.id_for_label attr=required%}
+                    <p style="color: tomato; font-size: x-small;" id="concentration-error"></p>
+                    <div class="text-danger ms-2 small">{% for error in form_filename.file.errors %} {{ error }} {% endfor %}</div>
+                </div>
+
+
+                <div class="col-8">
+                    <label for="exampleFormControlInput1" class="mb-3">Device</label>
+                    {% render_field form_filename.device class="form-control" id=form_filename.device.id_for_label attr=required%}
+                    <p style="color: tomato; font-size: x-small;" id="concentration-error"></p>
+                    <div class="text-danger ms-2 small">{% for error in form_filename.device.errors %} {{ error }} {% endfor %}</div>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Add Data</button>
+            </div>
+        
+        </form>
+
+
+
+
+
+        <!-- <form method="post" action="{% url 'experiment_detail' pk error %}" >
+            {% csrf_token %}
+
+            <div class="row mb-3">
+                <div class="col-8">
+                    
+                    <label for="exampleFormControlInput1" class="mb-3">Tres (min)</label> -->
+                    <!-- {% render_field form_data.res_time class="form-control" id=form_data.res_time.id_for_label attr=required%} -->
+                    <!-- <p style="color: tomato; font-size: x-small;" id="concentration-error"></p> -->
+                    <!-- <div class="text-danger ms-2 small">{% for error in form_data.res_time.errors %} {{ error }} {% endfor %}</div> -->
+                <!-- </div> -->
+                <!-- <div class="col-4"> -->
+                    <!-- <label for="exampleFormControlInput1" class="mb-3">Conversion</label> -->
+                    <!-- {% render_field form_data.result class="form-control" id=form_data.result.id_for_label attr=required %} -->
+                    <!-- <div class="text-danger ms-2 small">{% for error in form.result.errors %} {{ error }} {% endfor %}</div> -->
+                <!-- </div> -->
+                
+            <!-- </div>
+            <div class="mb-5">
+                <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Add Data</button>
+            </div>
+        </form> -->
+
+
+
+
+
+
+
+
+
+
         {% if files_list %}
             {% render_table files_list %}
         {% endif %}
@@ -54,10 +215,25 @@
                 {% render_field file_form.file class="form-control custom-file-input" id=file_form.file.id_for_label%}
                 <div class="text-danger ms-2 small">{% for error in file_form.file.errors %} {{ error }} {% endfor %}</div>
             </div>
+
+            <a href="{% static 'files/sample.xlsx'%}">Download a csv/xlsx file sample</a>
+            <br>
+            <br>
             {% if error %}
-            <p style="color: tomato;">an error has been occured</p>
+            <p class="error">Error: Invalid InputError: Invalid Input</p>
+            <p class="error">Make sure that:</p> 
+            <ul class="error">
+                <li class="error">The type of the input must be .CSV</li>
+                <li class="error">The .CSV file contains the following columns:</li>
+                <ul class="error">
+                    <li class="error">Scannumber</li>
+                    <li class="error">tres</li>
+                    <li class="error">treaction</li>
+                </ul>
+            </ul>
             {% endif %}
             <button type="submit" class="btn btn-success mb-3">Upload file</button>
+            <p id="p"></p>
         </form>
     </div>
     <div class="col"></div>
@@ -67,12 +243,80 @@
 {% block scripts %}
 
 <script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var array=[]
+      fetch("http://localhost:8000/experiment-test")
+       .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Process the JSON data
+          console.log(data.names);
+          var names = data.names;
+
+          
+        })
+        .catch(error => {
+          // Handle errors
+          console.error('Error:', error);
+        });
+
+    })
+
+
     //initialise the select2 library for fields with select2 class
     $(document).ready(function() {
         $('.select2').select2({
             theme: 'bootstrap4',
         });
     });
+
+    function molarityRestrictInput() {
+      var input = document.getElementById('id_molarity');
+      var value = parseInt(input.value);
+
+      if (isNaN(value) || value < 0 || value > 100) {
+        input.value = '';
+      }
+    }
+
+    // Filter dropdown items based on search input
+    // $(document).ready(function () {
+    //   $('#id_reagent_info').selectpicker();
+    // });
+
+    // // Handle search input change
+    // $('#searchInput').on('keyup', function () {
+    //   const keyword = $(this).val().toLowerCase();
+    //   $('#id_reagent_info option').each(function () {
+    //     const optionText = $(this).text().toLowerCase();
+    //     const isVisible = optionText.includes(keyword);
+    //     $(this).prop('hidden', !isVisible);
+    //   });
+    //   $('#id_reagent_info').selectpicker('refresh');
+    // });
+
+
+    function concentrationRestrictInput() {
+      
+      var input = document.getElementById('id_concentration');
+      var value = parseInt(input.value);
+      var concError = document.getElementById('concentration-error')
+
+
+      if (isNaN(value) || value < 0 || value > 100) {
+        input.value = '';
+        concError.innerHTML ='The concentration value must be between 0 and 100';
+
+      }
+    }
+
+
+
 </script>
 
 {% endblock scripts %}

@@ -9,7 +9,7 @@ class Device(models.Model):
     # id
     model = models.CharField(max_length=127)
     company = models.ForeignKey(
-       Company , on_delete=models.CASCADE, related_name='company')
+       Company , on_delete=models.CASCADE, related_name='company_id')
 
     def __str__(self):
         return f"{self.company}: {self.model}"
@@ -34,10 +34,10 @@ class Device(models.Model):
 
 class Measurement(models.Model):
 
-    # id  
+    # id
     experiment = models.ForeignKey(
-       Experiment , on_delete=models.PROTECT, related_name="getMeasurement")
-    device = models.ForeignKey(Device, on_delete=models.PROTECT)
+       Experiment , on_delete=models.CASCADE, related_name="getMeasurement")
+    device = models.ForeignKey(Device, on_delete=models.CASCADE)
     file = models.FileField(upload_to='measurements/')
     is_approved = models.BooleanField(
         default=True)  # set to False in production
@@ -56,9 +56,11 @@ class Data(models.Model):
 
     # if a measurement gets deleted, delete the data as well.
     measurement = models.ForeignKey(
-        Measurement, on_delete=models.CASCADE, related_name="getData")
+        Measurement, on_delete=models.CASCADE, related_name="measurement")
     res_time = models.FloatField()
     result = models.FloatField()
+    d = models.CharField(max_length=100, null=True)
+    mn = models.CharField(max_length=100, null=True)
     # is_outlier     a function can identify outliers and set this flag so this data can be hidden if needed
 
 

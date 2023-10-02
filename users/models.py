@@ -60,16 +60,16 @@ def send_staff_status_change_email(sender, instance, **kwargs):
         original_user = User.objects.get(pk=instance.pk)
         if original_user.is_staff != instance.is_staff and int(instance.is_staff)==1:
             send_mail(
-                'Staff Status Change',
-                'Your staff status has been changed. \n you have become a Staff Member of Momoda website',
+                'Subject: Congratulations on Your Promotion to Staff Member!',
+                "Dear User\nCongratulations on your promotion to Staff Member on our website! Your hard work and dedication have earned you this well-deserved recognition.\nAs a Staff Member, you now have access to various sections of the website, allowing you to contribute even more to our community. Your insights will play a vital role in shaping our platform's future.\nThank you for being an essential part of our website's success. If you have any questions, feel free to reach out to us.\n\nBest regards,\n\nMomoda Management Team",
                 'your_email@example.com',  # Sender's email address
                 [instance.email],  # Recipient's email address
                 fail_silently=False,
             )
         if original_user.is_staff != instance.is_staff and int(instance.is_staff)==0:
             send_mail(
-                'Staff Status Change',
-                'Your staff status has been changed. \n you have been demote to a normal user from a Staff Member of Momoda website',
+                'Subject: Role Change Notification',
+                "Dear User,\n We wanted to inform you that your role on our website has been adjusted. You are now a Normal User instead of a Staff Member.\n Your contributions are still valued, and you'll retain access to most features. If you have any questions, feel free to reach out.\n Thank you for your understanding. \n\n Best regards, \n Momomda Management Team",
                 'your_email@example.com',  # Sender's email address
                 [instance.email],  # Recipient's email address
                 fail_silently=False,
@@ -77,20 +77,29 @@ def send_staff_status_change_email(sender, instance, **kwargs):
 
         if original_user.is_superuser != instance.is_superuser and int(instance.is_superuser)==1:
             send_mail(
-                'Admin Status Change',
-                'Your admin status has been changed. \n you have become an Admin Member of Momoda website',
+                "Subject: Congratulations! You're Now an Admin Member!",
+                "Congratulations! You've been promoted to an Admin Member on our website in recognition of your exceptional contributions.\nWith this promotion comes access to the Admin Dashboard, giving you the power to manage and enhance our community.\nThank you for your dedication, and we look forward to working together in your new role!\n\nBest regards,\nMomoda Management Team",
                 'your_email@example.com',  # Sender's email address
                 [instance.email],  # Recipient's email address
                 fail_silently=False,
             )
         if original_user.is_superuser != instance.is_superuser and int(instance.is_superuser)==0:
             send_mail(
-                'Admin Status Change',
-                'Your admin status has been changed. \n you have been demote to a Staff Member from an Admin of Momoda Website',
+                'Subject: Role Change Notification',
+                'Dear User,\n We hope you are well. This email is to inform you that your role on our website has been changed from Admin Member to Staff User.\n We appreciate your valuable contributions and look forward to your continued involvement as a Staff User. \n If you have any questions, feel free to reach out to us. \n\n Best regards,\n Momoda Management Team',
                 'your_email@example.com',  # Sender's email address
                 [instance.email],  # Recipient's email address
                 fail_silently=False,
             )
+
+
+# @receiver(pre_save, sender=User)
+# def existing_user(sender, instance, **kwargs):
+#     if instance.email:
+#         existing_user = User.objects.get(email=instance.email)
+#         if existing_user:
+#             return
+
 
 
 class Group(models.Model):

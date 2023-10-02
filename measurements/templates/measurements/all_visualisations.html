@@ -9,7 +9,7 @@
 
 <form id="form" method="post" class="form-inline " action="{% url 'all_visualisations'%}">
     <div class="row d-flex-justify-centre">
-      <div class="col-md-2">               
+      <div class="col-md-2">
         <label for="floatingInput">Choose X axis</label>
         <select class="btn btn-secondary dropdown-toggle centre" name="choose_x" id="choose_x_id " style="font-size:13px;">
             {% for option in column_names %}<option value='{{option}}' > {{option}} {% endfor %}</option>
@@ -21,7 +21,7 @@
         <label >Choose Y axis</label>
         <select class="btn btn-secondary dropdown-toggle justify-right" name="choose_y" id="choose_y_id " style="font-size:13px;">
             {% for option in column_names %}<option value='{{option}}' > {{option}} {% endfor %}</option>
-            
+
         </select>
         {% include "yinput_accordion.html" %}
         <!-- <input class = 'form-control'type="text" id="formula-left-input" placeholder="Modify axis using x" name="y-input"> -->
@@ -70,15 +70,15 @@
     </div>
   </form>
   <div>
-    
-    
+
+
     <div class="spinner-border" role="status" id="loading">
       <span class="sr-only"></span>
     </div>
   <nav>
     <div class="nav nav-tabs" id="nav-tab" role="tablist">
     <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">3D view</button>
-    <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">2D rate view</button>
+    <!--<button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">2D rate view</button>-->
   </div>
 </nav>
 <div class="tab-content" id="nav-tabContent">

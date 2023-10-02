@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% block content %}
+<form method="post" action="{% url 'edit-data' pk fk %}" >
+    {% csrf_token %}
+    <div class="row mb-3">
+        <div class="col-8">
+            <label for="exampleFormControlInput1" class="mb-3">T-res</label>
+            {% render_field form.res_time class="form-control" id=form.res_time.id_for_label attr=required %}
+            <!-- <p style="color: tomato; font-size: x-small;" id="concentration-error"></p> -->
+            <div class="text-danger ms-2 small">{% for error in form.res_time.errors %} {{ error }} {% endfor %}</div>
+        </div>
+
+
+        <div class="col-8">
+            <label for="exampleFormControlInput1" class="mb-3">Conversion</label>
+            {% render_field form.result class="form-control" id=form.result.id_for_label attr=required %}
+            <!-- <p style="color: tomato; font-size: x-small;" id="concentration-error"></p> -->
+        <div class="text-danger ms-2 small">{% for error in form.result.errors %} {{ error }} {% endfor %}</div>
+
+
+        <div class="col-8">
+                <label for="exampleFormControlInput1" class="mb-3">Mn</label>
+                {% render_field form.mn class="form-control" id=form.mn.id_for_label attr=required %}
+                <!-- <p style="color: tomato; font-size: x-small;" id="concentration-error"></p> -->
+                <div class="text-danger ms-2 small">{% for error in form.mn.errors %} {{ error }} {% endfor %}</div>
+        </div>
+        
+        <div class="col-8">
+            <label for="exampleFormControlInput1" class="mb-3">D</label>
+            {% render_field form.d class="form-control" id=form.d.id_for_label attr=required %}
+            <!-- <p style="color: tomato; font-size: x-small;" id="concentration-error"></p> -->
+            <div class="text-danger ms-2 small">{% for error in form.d.errors %} {{ error }} {% endfor %}</div>
+        </div>
+    
+    
+    
+    
+    </div>
+    </div>
+
+    <div class="mb-5">
+        <button type="submit" name="save_changes" class="btn btn-primary me-3 col-sm-4">Add Data</button>
+    </div>
+
+</form>
+
+
+
+{% endblock content %}

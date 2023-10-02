@@ -1,7 +1,7 @@
 import imp
 from django.contrib import admin
 
-from .models import Reactor, Experiment, Inventory, Company, Experiment_Chemicals, Initiator
+from .models import *
 
 class ReactorConfig(admin.ModelAdmin):
 
@@ -33,3 +33,14 @@ class ExperimentChemicalsConfig(admin.ModelAdmin):
 
 admin.site.register(Experiment_Chemicals, ExperimentChemicalsConfig)
 admin.site.register(Initiator)
+admin.site.register(Equipment)
+
+admin.site.register(QuenchingAgent)
+admin.site.register(RaftAgent)
+admin.site.register(Catalyst)
+admin.site.register(Solvent)
+admin.site.register(cta)
+
+admin.site.register(Reagent)
+admin.site.register(Reagent_Info)
+admin.site.register(Experiment_Reagent)

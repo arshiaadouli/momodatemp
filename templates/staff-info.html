@@ -13,37 +13,20 @@
     <form method="POST" action="{% url 'staff_info' %}">
         {% csrf_token %}
 
-            <div class="row">
-                <div class="col">
-                    <div class="form-group container">
-                        <div class="col-sm-10">
-                          <input type="text" class="form-control" placeholder="First Name" name="first_name" required>
-                        </div>
-                    </div>
-                    
-                </div>
-                <div class="col">
-                    <div class="form-group">
-                        <div class="col-sm-10">
-                          <input type="text" class="form-control" placeholder="Surname" name="surname" required>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
+
             <br/>
             <div class="form-group container">
                 <input type="text" class="form-control" placeholder="subject" name="subject" required/>
             </div>
-     
+
             <br/>
 
-            <div class="form-group container">
-                    <input type="email" class="form-control" placeholder="email" name="email" required>
-            </div>
+            <!--<div class="form-group container">-->
+            <!--        <input type="email" class="form-control" placeholder="email" name="email" required>-->
+            <!--</div>-->
 
-            
-            <br/>
+
+
             <div class="form-group container">
                 <!-- <label for="exampleFormControlTextarea1"></label> -->
                 <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" placeholder="Message" name="message" required></textarea>
@@ -51,7 +34,7 @@
 
         {% if res %}
         <span>
-            
+
             Your message has been sent to one of our staff via Email
         </span>
         {% endif %}

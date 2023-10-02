@@ -5,17 +5,20 @@ from django.db.models import Q
 from itertools import chain
 from django.db.models.functions import Length
 from django.contrib import messages
-
 from .forms import SearchForm
 from .models import InChi, CAS, SMILES, Name
-from experiments.models import Experiment
+from experiments.models import Experiment, Reagent_Info
+from experiments.forms import AddReagentInfoForm
 from measurements.models import Measurement, Data
 from fuzzywuzzy import fuzz
 import pandas
 from plotly.offline import plot
 import plotly.graph_objects as go
+from experiments.decorators import group_required
 
-# @login_required
+@login_required
+@group_required
+
 def search_chemicals(request):
     if request.method == 'POST':
         query = request.POST.get('query')
@@ -55,7 +58,8 @@ def search_chemicals(request):
             common_name = Name.objects.filter(inchi=inchi.id, common_name=True).first()
             abbreviation = Name.objects.filter(inchi=inchi.id, abbreviation=True).first()
 
-            info = {"pk": inchi.id,
+            info = {
+                    "pk": inchi.id,
                     "inchi": inchi.inchi,
                     "inchi_key": inchi.inchi_key,
                     "cas": '' if cas is None else cas.cas,
@@ -75,76 +79,83 @@ def search_chemicals(request):
 
     return render(request, "chemicals/search.html", context)
 
-# @login_required
+@login_required
+@group_required
+
 def add_chemical(request):
 
     form = SearchForm(request.POST or None)
 
     if request.method == 'POST' and form.is_valid():
-
-        inchi_obj = InChi(
-            inchi = form.cleaned_data['inchi'],
-            inchi_key = form.cleaned_data['inchi_key'],
-            mw = form.cleaned_data['mw']
-        )
-        inchi_obj.save()
-
-        #save IUPAC name (if it exists)
-        if form.cleaned_data['iupac']:
-            to_save = Name(
-                inchi = inchi_obj,
-                name = form.cleaned_data['iupac'],
-                iupac = True
+        try: 
+            inchi_obj = InChi(
+                inchi = form.cleaned_data['inchi'],
+                inchi_key = form.cleaned_data['inchi_key'],
+                mw = form.cleaned_data['mw']
             )
-            to_save.save()
+            inchi_obj.save()
 
-        #save common name (if it exists)
-        if form.cleaned_data['common_name']:
-            to_save = Name(
-                inchi = inchi_obj,
-                name = form.cleaned_data['common_name'],
-                common_name = True
-            )
-            to_save.save()
 
-        #save abbreviation (if it exists)
-        if form.cleaned_data['abbreviation']:
-            to_save = Name(
-                inchi = inchi_obj,
-                name = form.cleaned_data['abbreviation'],
-                abbreviation = True
-            )
-            to_save.save()
-    
-        #save other names (if they exist)
-        if form.cleaned_data['other_names']:
-            for other_name in form.cleaned_data['other_names']:
+            #save IUPAC name (if it exists)
+            if form.cleaned_data['iupac']:
                 to_save = Name(
                     inchi = inchi_obj,
-                    name = other_name,
+                    name = form.cleaned_data['iupac'],
+                    iupac = True
                 )
                 to_save.save()
 
-        #save CAS number (if they exist)
-        if form.cleaned_data['cas']:
-            for cas in form.cleaned_data['cas']:
-                to_save = CAS(
+            #save common name (if it exists)
+            if form.cleaned_data['common_name']:
+                to_save = Name(
                     inchi = inchi_obj,
-                    cas = cas,
+                    name = form.cleaned_data['common_name'],
+                    common_name = True
                 )
                 to_save.save()
 
-        #save SMILES (if they exist)
-        if form.cleaned_data['smiles']:
-            for smiles in form.cleaned_data['smiles']:
-                to_save = SMILES(
+            #save abbreviation (if it exists)
+            if form.cleaned_data['abbreviation']:
+                to_save = Name(
                     inchi = inchi_obj,
-                    smiles = smiles,
+                    name = form.cleaned_data['abbreviation'],
+                    abbreviation = True
                 )
                 to_save.save()
+        
+            #save other names (if they exist)
+            if form.cleaned_data['other_names']:
+                for other_name in form.cleaned_data['other_names']:
+                    to_save = Name(
+                        inchi = inchi_obj,
+                        name = other_name,
+                    )
+                    to_save.save()
 
-        messages.success(request, 'Your chemical was added to the database')
-        return redirect(to='search_chemicals')
+            #save CAS number (if they exist)
+            if form.cleaned_data['cas']:
+                for cas in form.cleaned_data['cas']:
+                    to_save = CAS(
+                        inchi = inchi_obj,
+                        cas = cas,
+                    )
+                    to_save.save()
+
+            #save SMILES (if they exist)
+            if form.cleaned_data['smiles']:
+                for smiles in form.cleaned_data['smiles']:
+                    to_save = SMILES(
+                        inchi = inchi_obj,
+                        smiles = smiles,
+                    )
+                    to_save.save()
+
+            last_created_chemical_id = InChi.objects.last().id
+
+            messages.success(request, 'Your chemical was added to the database')
+            return redirect(add_reagent_info)
+        except:
+            form.add_error('inchi_key', 'Duplicate Inchi Key')
 
     context = {
         'form': form,
@@ -152,13 +163,46 @@ def add_chemical(request):
 
     return render(request, "chemicals/add.html", context)
 
-# @login_required
+
+from django.http import Http404
+@group_required
+
+def add_reagent_info(request, chemical_id=None):
+    if chemical_id:
+        if not InChi.objects.filter(id=chemical_id):
+            raise Http404("This page does not exist")
+    if request.method == 'POST':
+        form = AddReagentInfoForm(request.POST)
+        if chemical_id:
+            form.instance.chemical_name = Name.objects.filter(iupac=True).last()
+
+        if form.is_valid():
+            print('passed here')
+            form.save()
+            messages.success(request, 'Your Reagent was successfully added')
+            return redirect(to='add_experiment')
+
+    else:
+        form = AddReagentInfoForm()
+
+
+    context = {
+        'form': form,
+        'chemical_id':chemical_id
+    }
+
+    return render(request, "chemicals/add_reagent_info.html", context)
+
+
+
+
+@login_required
+@group_required
+
 def chemical_details(request, pk):
 
     test = InChi.objects.get(id=pk).getInventory.all()
     name = InChi.objects.get(id=pk)
-
-    print(name)
 
     y = Experiment.objects.none()
     for t in test:
